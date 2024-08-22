@@ -4,6 +4,7 @@ import java.awt.event.*;
 import java.awt.font.TextLayout;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -16,6 +17,7 @@ public class SnakeGame extends JPanel implements ActionListener {
     private static final int FRAME_RATE = 20;
     private boolean gameStarted = false;
     private boolean gameOver = false;
+    private int highScore;
     private GamePoint food;
     private Direction direction = Direction.UP;
     private Direction newDirection = Direction.UP;
@@ -82,7 +84,14 @@ public class SnakeGame extends JPanel implements ActionListener {
                     }
                     break;
             }
+
         }
+        else if (keyCode == KeyEvent.VK_ESCAPE) {
+            gameStarted = false;
+            gameOver = false;
+            resetGameData();
+        }
+
     }
 
     private void resetGameData() {
@@ -106,38 +115,53 @@ public class SnakeGame extends JPanel implements ActionListener {
         super.paintComponent(graphics);
 
         if (!gameStarted) {
-
-
-            graphics.setColor(Color.WHITE);
-            graphics.setFont(graphics.getFont().deriveFont(30f));
-
-            int currentHeight = height / 3;
-            final var graphics2D = (Graphics2D) graphics;
-            final var frc = graphics2D.getFontRenderContext();
-
-            // sample message
-            final String message = "Press Enter to Play";
-            for (final var line : message.split("\n")) {
-
-                final var layout = new TextLayout(line, graphics2D.getFont(), frc);
-                final var bounds = layout.getBounds();
-                final var targetWidth = (float) (width - bounds.getWidth()) / 2;
-                layout.draw(graphics2D, targetWidth, currentHeight);
-                currentHeight += graphics2D.getFont().getSize();
-            }
-        }
-        else {
+            printMessage(graphics, "Press Enter Bar to Begin");
+        } else {
             graphics.setColor(Color.WHITE);
             graphics.fillRect(food.x, food.y, cellSize ,cellSize);
 
-            graphics.setColor(Color.RED);
+            Color snakeColor = Color.GREEN;
+            // as snake grows, each time user enters game loop, snake is redrawn
+            // set of consecutive squares
             for (final var point : snake) {
-                // as snake grows, each time user enters game loop, snake is redrawn
-                // set of consecutive squares
+                graphics.setColor(snakeColor);
                 graphics.fillRect(point.x, point.y, cellSize, cellSize);
+
+                final int newGreen = (int) Math.round(snakeColor.getGreen() * (0.90));
+                snakeColor = new Color (0, newGreen, 0);
+
+                if (gameOver) {
+                    final int currentScore = snake.size();
+                    if (currentScore > highScore) {
+                        highScore = currentScore;
+
+                    }
+                    printMessage(graphics, "Your Score: " + currentScore
+                            + "\nHigh Score: " + highScore
+                            + "\nPress Esc to Reset");
+
+
+                }
             }
         }
     }
+
+    private void printMessage(final Graphics graphics, final String message) {
+        graphics.setColor(Color.WHITE);
+        graphics.setFont(graphics.getFont().deriveFont(30f));
+        int currentHeight = height / 3;
+        final var graphics2D = (Graphics2D) graphics;
+        final var frc = graphics2D.getFontRenderContext();
+        for (final var line : message.split("\n")) {
+
+            final var layout = new TextLayout(line, graphics2D.getFont(), frc);
+            final var bounds = layout.getBounds();
+            final var targetWidth = (float) (width - bounds.getWidth()) / 2;
+            layout.draw(graphics2D, targetWidth, currentHeight);
+            currentHeight += graphics2D.getFont().getSize();
+        }
+    }
+
     private void move() {
         final GamePoint head = snake.getFirst();
         final GamePoint newHead = switch(direction){
@@ -168,7 +192,12 @@ public class SnakeGame extends JPanel implements ActionListener {
         final GamePoint head = snake.getFirst();
         final var invalidWidth = (head.x < 0) || (head.x >= width);
         final var invalidHeight = (head.y < 0) || (head.y >= height);
-        return (invalidWidth || invalidHeight);
+        if (invalidWidth || invalidHeight){
+            return true;
+        }
+        // checks hash entries
+        // checking when the snake colliding with itself
+        return snake.size() != new HashSet<>(snake).size();
     }
 
     @Override
