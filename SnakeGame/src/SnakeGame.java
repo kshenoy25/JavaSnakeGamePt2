@@ -29,6 +29,7 @@ public class SnakeGame extends JPanel implements ActionListener {
             super();
             this.width = width;
             this.height = height;
+
             // give users 2 seconds if the snake goes from one end of the width to the other
             this.cellSize = width / (FRAME_RATE * 2);
             setPreferredSize(new Dimension(width, height));
@@ -96,7 +97,7 @@ public class SnakeGame extends JPanel implements ActionListener {
 
     private void resetGameData() {
         // list of boxes
-        // boxes will grow over time
+        // will grow over time
         snake.clear();
         snake.add(new GamePoint(width / 2, height / 2));
         generateFood();
@@ -113,10 +114,10 @@ public class SnakeGame extends JPanel implements ActionListener {
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
-
         if (!gameStarted) {
             printMessage(graphics, "Press Enter Bar to Begin");
-        } else {
+        }
+        else {
             graphics.setColor(Color.WHITE);
             graphics.fillRect(food.x, food.y, cellSize ,cellSize);
 
@@ -139,8 +140,6 @@ public class SnakeGame extends JPanel implements ActionListener {
                     printMessage(graphics, "Your Score: " + currentScore
                             + "\nHigh Score: " + highScore
                             + "\nPress Esc to Reset");
-
-
                 }
             }
         }
@@ -159,6 +158,7 @@ public class SnakeGame extends JPanel implements ActionListener {
             final var targetWidth = (float) (width - bounds.getWidth()) / 2;
             layout.draw(graphics2D, targetWidth, currentHeight);
             currentHeight += graphics2D.getFont().getSize();
+
         }
     }
 
@@ -184,7 +184,6 @@ public class SnakeGame extends JPanel implements ActionListener {
             snake.removeLast();
         }
         direction = newDirection;
-
     }
 
     private boolean checkCollision() {
@@ -205,10 +204,8 @@ public class SnakeGame extends JPanel implements ActionListener {
         if (gameStarted && !gameOver) {
             move();
         }
-
         // access to J components graphics object
         // call into Java Swing API
-
         repaint();
     }
 
